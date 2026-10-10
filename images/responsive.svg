@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Illustration douce et réconfortante d'un cocon de soirée avec bougie parfumée, pile de carnets et lune rose">
+  <defs>
+    <linearGradient id="bgCozyNight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff1f2" />
+      <stop offset="50%" stop-color="#fce7f3" />
+      <stop offset="100%" stop-color="#fed7aa" stop-opacity="0.2" />
+    </linearGradient>
+    <linearGradient id="candleGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#ffe4e6" />
+    </linearGradient>
+    <linearGradient id="candleWax" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbcfe8" />
+      <stop offset="100%" stop-color="#f472b6" />
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+    <filter id="cozyShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#be185d" flood-opacity="0.14" />
+    </filter>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Fond -->
+  <rect width="1200" height="675" fill="url(#bgCozyNight)" />
+
+  <!-- Fenêtre ronde / Lune rose du soir 🌙 -->
+  <g transform="translate(860, 100)" filter="url(#cozyShadow)">
+    <circle cx="100" cy="100" r="100" fill="#fdf2f8" stroke="#fbcfe8" stroke-width="3" />
+    <!-- Croissant de lune rose poudré -->
+    <path d="M 120 40 A 65 65 0 1 0 150 150 A 55 55 0 1 1 120 40 Z" fill="#f43f5e" opacity="0.75" />
+    <!-- Étoiles de nuit -->
+    <circle cx="60" cy="70" r="3" fill="#fb7185" />
+    <circle cx="85" cy="140" r="4" fill="#fb7185" />
+    <circle cx="50" cy="120" r="2.5" fill="#f472b6" />
+  </g>
+
+  <!-- Étoiles scintillantes dans la pièce ✨ -->
+  <g fill="#ec4899" opacity="0.5">
+    <path d="M 220 180 Q 224 168 228 180 Q 240 184 228 188 Q 224 200 220 188 Q 208 184 220 180 Z" />
+    <circle cx="160" cy="240" r="4" />
+    <circle cx="320" cy="120" r="5" />
+    <circle cx="780" cy="220" r="3.5" />
+  </g>
+
+  <!-- Pile de carnets intimes pastel empilés 📚 -->
+  <g transform="translate(240, 260)" filter="url(#cozyShadow)">
+    <!-- Carnet du bas (Lavande / Rose doux) -->
+    <rect x="0" y="160" width="340" height="48" rx="8" fill="#fda4af" stroke="#f43f5e" stroke-width="1.5" />
+    <rect x="20" y="166" width="310" height="36" fill="#fffafb" />
+    <rect x="0" y="160" width="24" height="48" rx="6" fill="#e11d48" />
+
+    <!-- Carnet du milieu (Rose bonbon) -->
+    <rect x="25" y="105" width="290" height="46" rx="8" fill="#f472b6" stroke="#db2777" stroke-width="1.5" />
+    <rect x="42" y="111" width="262" height="34" fill="#fffafb" />
+    <rect x="25" y="105" width="22" height="46" rx="6" fill="#be185d" />
+
+    <!-- Carnet du haut (Rose poudré avec nœud) -->
+    <rect x="50" y="50" width="240" height="45" rx="8" fill="#fce7f3" stroke="#f472b6" stroke-width="1.5" />
+    <rect x="68" y="56" width="212" height="33" fill="#ffffff" />
+    <rect x="50" y="50" width="20" height="45" rx="6" fill="#f472b6" />
+
+    <!-- Ruban qui entoure la pile de carnets -->
+    <rect x="180" y="46" width="16" height="162" fill="#db2777" opacity="0.85" />
+    <!-- Petit nœud au sommet de la pile 🎀 -->
+    <circle cx="188" cy="46" r="6" fill="#be185d" />
+    <path d="M 188 46 C 176 36, 166 44, 172 54 C 178 62, 186 52, 188 46 Z" fill="#f43f5e" />
+    <path d="M 188 46 C 200 36, 210 44, 204 54 C 198 62, 190 52, 188 46 Z" fill="#f43f5e" />
+  </g>
+
+  <!-- Bougie parfumée allumée dans son pot en verre 🕯️ -->
+  <g transform="translate(640, 240)" filter="url(#cozyShadow)">
+    <!-- Aura de lumière chaleureuse -->
+    <circle cx="100" cy="70" r="120" fill="#fef08a" opacity="0.25" filter="url(#glow)" />
+    <circle cx="100" cy="70" r="70" fill="#fbcfe8" opacity="0.35" filter="url(#glow)" />
+
+    <!-- Pot en verre de la bougie -->
+    <rect x="40" y="90" width="120" height="150" rx="16" fill="url(#candleGlass)" stroke="#fbcfe8" stroke-width="2" />
+    
+    <!-- Cire rose poudrée -->
+    <rect x="46" y="115" width="108" height="118" rx="10" fill="url(#candleWax)" opacity="0.8" />
+    
+    <!-- Étiquette délicate sur la bougie -->
+    <rect x="58" y="145" width="84" height="60" rx="6" fill="#ffffff" stroke="#f9d8e6" stroke-width="1.2" />
+    <text x="100" y="172" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#be185d">DOUCE NUIT</text>
+    <text x="100" y="190" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" text-anchor="middle" fill="#fb7185">Rose &amp; Vanille</text>
+
+    <!-- Mèche -->
+    <line x1="100" y1="115" x2="100" y2="85" stroke="#78350f" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Flamme rayonnante -->
+    <path d="M 100 50 C 90 70, 93 84, 100 85 C 107 84, 110 70, 100 50 Z" fill="url(#flameGrad)" />
+    <!-- Cœur blanc éclatant de la flamme -->
+    <ellipse cx="100" cy="78" rx="3.5" ry="5.5" fill="#ffffff" />
+  </g>
+</svg>

@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Illustration douce d'un matin calme avec carnet intime, tasse fumante et fleurs roses">
+  <defs>
+    <linearGradient id="bgMorning" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5f8" />
+      <stop offset="50%" stop-color="#fdf2f8" />
+      <stop offset="100%" stop-color="#fee2e2" />
+    </linearGradient>
+    <linearGradient id="diaryCover" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#db2777" />
+    </linearGradient>
+    <linearGradient id="mugGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fce7f3" />
+    </linearGradient>
+    <filter id="softPinkShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#be185d" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Fond rose poudré délicat -->
+  <rect width="1200" height="675" fill="url(#bgMorning)" />
+
+  <!-- Éléments d'ambiance et scintillements ✨ -->
+  <g fill="#f43f5e" opacity="0.45">
+    <!-- Étoiles brillantes -->
+    <path d="M 180 120 Q 185 105 190 120 Q 205 125 190 130 Q 185 145 180 130 Q 165 125 180 120 Z" />
+    <path d="M 980 160 Q 984 148 988 160 Q 1000 164 988 168 Q 984 180 980 168 Q 968 164 980 160 Z" />
+    <path d="M 1040 380 Q 1043 370 1046 380 Q 1056 383 1046 386 Q 1043 396 1040 386 Q 1030 383 1040 380 Z" />
+    <circle cx="240" cy="190" r="5" />
+    <circle cx="160" cy="240" r="3.5" />
+    <circle cx="920" cy="110" r="4" />
+    <circle cx="1060" cy="220" r="6" />
+  </g>
+
+  <!-- Halo de lumière matinale rose pastel -->
+  <circle cx="620" cy="340" r="260" fill="#fdf0f5" filter="url(#softPinkShadow)" />
+  <circle cx="620" cy="340" r="210" fill="#ffffff" opacity="0.7" />
+
+  <!-- Table en bois clair ou nappe en dentelle stylisée -->
+  <line x1="120" y1="520" x2="1080" y2="520" stroke="#f9d8e6" stroke-width="3" stroke-linecap="round" />
+  <line x1="200" y1="540" x2="1000" y2="540" stroke="#f9d8e6" stroke-width="1.5" stroke-dasharray="8 12" />
+
+  <!-- Carnet intime (Diary) fermé avec ruban marque-page -->
+  <g transform="translate(320, 220)" filter="url(#softPinkShadow)">
+    <!-- Tranche de pages blanches -->
+    <rect x="18" y="12" width="280" height="260" rx="14" fill="#fffafb" stroke="#f9d8e6" stroke-width="2" />
+    <!-- Couverture rose satinée -->
+    <rect x="0" y="0" width="280" height="260" rx="14" fill="url(#diaryCover)" />
+    <!-- Cœur doré ou rose pâle gravé au centre -->
+    <path d="M 140 115 C 140 95, 115 90, 115 110 C 115 130, 140 150, 140 155 C 140 150, 165 130, 165 110 C 165 90, 140 95, 140 115 Z" fill="#ffe4e6" opacity="0.9" />
+    <!-- Ruban marque-page qui dépasse -->
+    <path d="M 140 250 L 140 310 L 148 298 L 156 310 L 156 250 Z" fill="#be185d" />
+    <!-- Dorure des bords -->
+    <rect x="22" y="0" width="4" height="260" fill="#fbcfe8" opacity="0.6" />
+  </g>
+
+  <!-- Tasse à café / matcha latte rose avec mousse en cœur ☕ -->
+  <g transform="translate(680, 260)" filter="url(#softPinkShadow)">
+    <!-- Sous-tasse -->
+    <ellipse cx="110" cy="210" rx="110" ry="24" fill="#ffe4e6" stroke="#fbcfe8" stroke-width="2" />
+    
+    <!-- Corps de la tasse -->
+    <path d="M 40 110 C 40 190, 70 200, 110 200 C 150 200, 180 190, 180 110 Z" fill="url(#mugGrad)" stroke="#fbcfe8" stroke-width="2" />
+    <!-- Anse de la tasse -->
+    <path d="M 175 130 C 215 130, 215 175, 172 175" fill="none" stroke="#f472b6" stroke-width="8" stroke-linecap="round" />
+    
+    <!-- Boisson chaude / Latte art en cœur -->
+    <ellipse cx="110" cy="115" rx="60" ry="18" fill="#fbcfe8" />
+    <path d="M 110 112 C 110 102, 95 100, 95 110 C 95 119, 110 128, 110 130 C 110 128, 125 119, 125 110 C 125 100, 110 102, 110 112 Z" fill="#ffffff" />
+
+    <!-- Vapeur douce en forme de vaguelette / cœur -->
+    <path d="M 100 80 Q 90 55 105 35" fill="none" stroke="#f472b6" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+    <path d="M 120 75 Q 130 50 115 30" fill="none" stroke="#fb7185" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+  </g>
+
+  <!-- Petite branche de fleurs de cerisier / pivoine rose 🌸 -->
+  <g transform="translate(210, 420)">
+    <path d="M 0 90 Q 60 40 120 20" fill="none" stroke="#be185d" stroke-width="2.5" opacity="0.5" stroke-linecap="round" />
+    <!-- Fleur 1 -->
+    <circle cx="120" cy="20" r="14" fill="#fce7f3" />
+    <circle cx="120" cy="20" r="6" fill="#f43f5e" />
+    <!-- Fleur 2 -->
+    <circle cx="65" cy="50" r="11" fill="#ffe4e6" />
+    <circle cx="65" cy="50" r="4" fill="#fb7185" />
+    <!-- Pétale qui vole -->
+    <ellipse cx="170" cy="30" rx="9" ry="5" transform="rotate(-20 170 30)" fill="#fda4af" opacity="0.8" />
+  </g>
+</svg>
