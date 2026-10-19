@@ -1,31 +1,23 @@
-/* ==========================================================================
-   Mon Journal Doux – Blog & Carnet Intime Girly (Édition Pink & Coquette)
-   Feuille de styles principale - Conforme W3C & Responsive Design
-   ========================================================================== */
-
-/* ===== Variables globales : Palette Girly & Nuances de Rose ===== */
 :root {
   /* Nuances de rose féeriques et chaleureuses */
-  --bg-primary: #fff6f9;         /* Lait fraise crémeux / rose poudré ultra-doux */
-  --bg-surface: #ffffff;         /* Blanc pur soyeux */
-  --bg-subtle: #fdf0f5;          /* Rose pastel pour encarts et fonds doux */
+  --bg-primary: #fff6f9;        
+  --bg-surface: #ffffff;         
+  --bg-subtle: #fdf0f5;          
   --bg-hover: #fff1f5;
   
-  --ink-primary: #3d1c2a;        /* Rose cacao profond & chaleureux (contraste optimal) */
-  --ink-secondary: #6e4657;      /* Bois de rose feutré pour la lecture */
-  --ink-muted: #9e7587;          /* Teinte poudrée pour les dates et métadonnées */
+  --ink-primary: #3d1c2a;       
+  --ink-secondary: #6e4657;     
+  --ink-muted: #9e7587;          
+  --accent-pink: #ec4899;       
+  --accent-rose: #e11d48;       
+  --accent-soft-pink: #f472b6;   
+  --accent-blush: #fce7f3;       
+  --accent-candy: #fda4af;      
+  --accent-berry: #be185d;       
 
-  --accent-pink: #ec4899;        /* Rose bonbon lumineux */
-  --accent-rose: #e11d48;        /* Rose framboise raffiné */
-  --accent-soft-pink: #f472b6;   /* Rose pastel vif */
-  --accent-blush: #fce7f3;       /* Blush poudré pour badges et tags */
-  --accent-candy: #fda4af;       /* Pêche rosée délicate */
-  --accent-berry: #be185d;       /* Rose cerise profond */
+  --border-light: #f9d8e7;      
+  --border-focus: #f472b6;      
 
-  --border-light: #f9d8e7;       /* Bordure rose pastel délicate */
-  --border-focus: #f472b6;       /* Bordure de focus accessible */
-
-  /* Dégradés Girly signature */
   --gradient-accent: linear-gradient(135deg, #f472b6 0%, #fb7185 50%, #db2777 100%);
   --gradient-badge: linear-gradient(135deg, #fff1f2 0%, #fdf2f8 50%, #fce7f3 100%);
   --gradient-quote: linear-gradient(180deg, #fff5f8 0%, #ffffff 100%);
@@ -34,7 +26,6 @@
   --font-title: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  /* Formes et rondeurs douces */
   --radius-sm: 10px;
   --radius-md: 18px;
   --radius-lg: 24px;
@@ -849,10 +840,6 @@ main {
   color: var(--accent-rose);
   font-weight: 600;
 }
-
-/* ==========================================================================
-   Responsive Design (Contrainte : Mobile, Tablette, Desktop obligatoires)
-   ========================================================================== */
 
 /* ===== Paliers Tablette : 600px et plus ===== */
 @media (min-width: 600px) {
