@@ -506,41 +506,96 @@
   }
 
   /* ==========================================================================
-    NAVIGATION FLUIDE ENTRE ARTICLES 
+     8. NAVIGATION FLUIDE ENTRE ARTICLES (SPA LÉGÈRE ET ROBUSTE)
      ========================================================================== */
+  function normalizeUrl(rawHref) {
+    try {
+      const url = new URL(rawHref, window.location.href);
+
+      // Correction automatique : si une URL pointe par erreur vers /pages/index.html
+      // on redirige proprement vers /index.html à la racine du projet
+      if (url.pathname.endsWith('/pages/index.html')) {
+        url.pathname = url.pathname.replace(/\/pages\/index\.html$/, '/index.html');
+      }
+
+      return url;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function initSmoothNavigation() {
     document.addEventListener('click', function (e) {
       const link = e.target.closest('a');
       if (!link) return;
 
-      const href = link.getAttribute('href');
-      if (!href) return;
-      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http://') || href.startsWith('https://') || link.target === '_blank') {
+      const rawHref = link.getAttribute('href');
+      if (!rawHref) return;
+
+      // Ignorer les protocoles externes, mailto, tel, ou nouvel onglet
+      if (rawHref.startsWith('mailto:') || rawHref.startsWith('tel:') || link.target === '_blank') {
         return;
       }
 
-      const isInternalPage = href.endsWith('.html') || href === 'index.html' || href.includes('pages/article-') || href === '../index.html' || href.includes('article-');
-      if (!isInternalPage) return;
+      // Si le lien est une ancre locale (#section) sur la page actuelle
+      if (rawHref.startsWith('#')) {
+        const targetEl = document.querySelector(rawHref);
+        if (targetEl) {
+          e.preventDefault();
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+          history.pushState(null, '', rawHref);
+        }
+        return;
+      }
+
+      const targetUrl = normalizeUrl(rawHref);
+      if (!targetUrl) return;
+
+      // Vérifier que c'est bien une navigation sur le même domaine
+      if (targetUrl.origin !== window.location.origin) {
+        return;
+      }
+
+      // Vérifier si le lien pointe vers une page HTML du blog
+      const isHtmlPage = targetUrl.pathname.endsWith('.html') || targetUrl.pathname.endsWith('/');
+      if (!isHtmlPage) return;
 
       e.preventDefault();
-      loadPageViaSPA(link.href);
+      loadPageViaSPA(targetUrl.href);
     });
+
+    // Prise en charge des boutons Précédent / Suivant du navigateur
     window.addEventListener('popstate', function () {
-      loadPageViaSPA(window.location.href, false);
+      const normalizedCurrent = normalizeUrl(window.location.href);
+      if (normalizedCurrent) {
+        loadPageViaSPA(normalizedCurrent.href, false);
+      }
     });
   }
 
-  function loadPageViaSPA(url, pushToHistory = true) {
-    const main = document.querySelector('main');
-    if (!main) {
-      window.location.href = url;
+  function loadPageViaSPA(targetHref, pushToHistory = true) {
+    const targetUrl = normalizeUrl(targetHref);
+    if (!targetUrl) {
+      window.location.href = targetHref;
       return;
     }
+
+    const main = document.querySelector('main');
+    if (!main) {
+      window.location.href = targetUrl.href;
+      return;
+    }
+
+    // URL sans le hash (#) pour la requête fetch
+    const fetchUrl = targetUrl.origin + targetUrl.pathname + targetUrl.search;
+
     main.classList.add('page-fade-out');
 
-    fetch(url)
+    fetch(fetchUrl)
       .then(res => {
-        if (!res.ok) throw new Error('Erreur de chargement');
+        if (!res.ok) {
+          throw new Error('Page introuvable : statut ' + res.status);
+        }
         return res.text();
       })
       .then(htmlText => {
@@ -548,41 +603,65 @@
         const doc = parser.parseFromString(htmlText, 'text/html');
 
         const newMain = doc.querySelector('main');
+        const newHeader = doc.querySelector('.site-header');
+        const newFooter = doc.querySelector('.site-footer');
         const newTitle = doc.querySelector('title')?.textContent || document.title;
-        const newNavLinks = doc.querySelectorAll('.site-header nav a');
 
         if (!newMain) {
-          window.location.href = url;
+          window.location.href = targetUrl.href;
           return;
         }
 
         setTimeout(() => {
-          main.innerHTML = newMain.innerHTML;
-          document.title = newTitle;
-          const currentPath = new URL(url).pathname;
-          document.querySelectorAll('.site-header nav a').forEach(a => {
-            const aHref = a.getAttribute('href');
-            if (currentPath.endsWith('index.html') && (aHref === 'index.html' || aHref === '../index.html')) {
-              a.classList.add('active');
-            } else {
-              a.classList.remove('active');
-            }
-          });
-
-          if (pushToHistory) {
-            history.pushState(null, newTitle, url);
+          // Mise à jour de l'en-tête (pour garantir la validité des liens relatifs ../ vs .)
+          const currentHeader = document.querySelector('.site-header');
+          if (currentHeader && newHeader) {
+            currentHeader.innerHTML = newHeader.innerHTML;
           }
 
-          window.scrollTo({ top: 0, behavior: 'instant' });
+          // Mise à jour du contenu principal
+          main.innerHTML = newMain.innerHTML;
+
+          // Mise à jour du pied de page
+          const currentFooter = document.querySelector('.site-footer');
+          if (currentFooter && newFooter) {
+            currentFooter.innerHTML = newFooter.innerHTML;
+          }
+
+          document.title = newTitle;
+
+          // Mise à jour de l'URL dans la barre d'adresse
+          if (pushToHistory) {
+            history.pushState(null, newTitle, targetUrl.href);
+          }
+
+          // Gestion du défilement : vers l'ancre demandée (#articles, etc.) ou tout en haut
+          if (targetUrl.hash) {
+            setTimeout(() => {
+              const hashTarget = document.querySelector(targetUrl.hash);
+              if (hashTarget) {
+                hashTarget.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }
+            }, 60);
+          } else {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }
 
           main.classList.remove('page-fade-out');
           main.classList.add('page-fade-in');
           setTimeout(() => main.classList.remove('page-fade-in'), 300);
+
+          // Ré-attachement de tous les modules JS (thème, recherche, commentaires, etc.)
+          initTheme();
           reinitPageModules();
         }, 150);
       })
-      .catch(() => {
-        window.location.href = url;
+      .catch(err => {
+        console.warn('Navigation SPA : repli vers navigation normale.', err);
+        // En cas de repli, naviguer vers l'URL corrigée
+        window.location.href = targetUrl.href;
       });
   }
 
