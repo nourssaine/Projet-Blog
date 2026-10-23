@@ -7,12 +7,25 @@
   <meta name="description" content="Mon Journal Doux – Un carnet intime girly et poétique où déposer ses pensées, cultiver la gratitude et romantiser le quotidien dans un cocon rose et réconfortant.">
   <title>Mon Journal Doux – Carnet intime &amp; confidences</title>
   
-  <!-- Polices Google Fonts : Fraunces (titres doux & élégants) & Plus Jakarta Sans (lecture fluide) -->
+  <!-- Script anti-flash pour le mode sombre -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('mon-journal-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Polices Google Fonts : Fraunces & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 
 <body>
@@ -23,36 +36,70 @@
         <span class="brand-heart" aria-hidden="true">♡</span>
         <p class="site-title"><a href="index.html">Mon Journal Doux</a></p>
       </div>
-      <nav aria-label="Navigation principale">
-        <ul>
-          <li><a href="index.html" class="active">Accueil</a></li>
-          <li><a href="#articles">Journal</a></li>
-          <li><a href="#manifesto">À propos</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </nav>
+
+      <div class="header-actions">
+        <nav aria-label="Navigation principale">
+          <ul>
+            <li><a href="index.html" class="active">Accueil</a></li>
+            <li><a href="#articles">Journal</a></li>
+            <li><a href="#manifesto">À propos</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <!-- Bascule Mode Clair / Sombre -->
+        <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Basculer entre le mode clair et le mode nuit" title="Basculer le thème">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Contenu principal -->
   <main>
+    <!-- Section d'introduction -->
     <section class="intro" aria-label="Introduction au journal">
       <span class="intro-tag">✨ Carnet intime &amp; Douceurs</span>
       <h1>Déposer ses pensées, chérir chaque instant</h1>
       <p>Bienvenue dans mon petit sanctuaire rose poudré. Un journal intime bienveillant où l'on prend le temps de ralentir, d'écrire à cœur ouvert et de romantiser les petits bonheurs du quotidien.</p>
     </section>
 
-    <!-- Section Liste des entrées de journal -->
+    <!-- Section Liste des articles avec recherche & filtres -->
     <section id="articles" aria-label="Dernières pages de journal">
+      
+      <!-- Outil interactif : Recherche et filtrage en temps réel -->
+      <div class="search-filter-wrapper">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="article-search" class="search-input" placeholder="Rechercher une pensée, un rituel, un mot doux..." aria-label="Rechercher dans le journal">
+          <button id="search-clear-btn" class="search-clear-btn" type="button" aria-label="Effacer la recherche" title="Effacer">✕</button>
+        </div>
+
+        <div class="filter-categories" role="group" aria-label="Filtrer les pages par thématique">
+          <span class="filter-label">Thématiques :</span>
+          <button type="button" class="filter-btn active" data-filter="all">Toutes les pages (3)</button>
+          <button type="button" class="filter-btn" data-filter="matin">🌸 Matin Doux</button>
+          <button type="button" class="filter-btn" data-filter="journaling">✨ Journaling</button>
+          <button type="button" class="filter-btn" data-filter="soir">🕯️ Cocon du Soir</button>
+        </div>
+      </div>
+
       <div class="section-header">
         <h2>Dernières pages du carnet</h2>
         <span class="section-count">3 entrées écrites avec amour</span>
       </div>
 
+      <!-- Message si aucun résultat -->
+      <div id="search-empty-state" class="search-empty-state empty-hidden">
+        <span class="empty-icon" aria-hidden="true">💌</span>
+        <p class="empty-title">Aucune page ne correspond à votre recherche</p>
+        <p class="empty-desc">Essayez un autre mot-clé ou sélectionnez « Toutes les pages » pour retrouver nos douces confidences.</p>
+      </div>
+
       <div class="articles-grid">
 
         <!-- Entrée 1 -->
-        <article class="card">
+        <article class="card" data-category="matin">
           <div class="card-media">
             <span class="card-badge">🌸 Matin Doux</span>
             <img src="images/minimalisme.svg" alt="Illustration chaleureuse d'un carnet intime rose et d'une tasse de café chaud avec de la vapeur en forme de cœur" width="1200" height="675" loading="eager">
@@ -79,7 +126,7 @@
         </article>
 
         <!-- Entrée 2 -->
-        <article class="card">
+        <article class="card" data-category="journaling">
           <div class="card-media">
             <span class="card-badge">✨ Journaling</span>
             <img src="images/polices.svg" alt="Illustration poétique d'un carnet ouvert avec photo polaroïd, rubans décoratifs et stylo doré" width="1200" height="675" loading="lazy">
@@ -106,7 +153,7 @@
         </article>
 
         <!-- Entrée 3 -->
-        <article class="card">
+        <article class="card" data-category="soir">
           <div class="card-media">
             <span class="card-badge">🕯️ Cocon du Soir</span>
             <img src="images/responsive.svg" alt="Illustration d'une chambre cosy au crépuscule avec bougie parfumée rose et pile de carnets sous la lune" width="1200" height="675" loading="lazy">
@@ -135,6 +182,7 @@
       </div>
     </section>
 
+    <!-- Encart de présentation du journal intime / Manifeste -->
     <section class="blog-manifesto" id="manifesto" aria-label="Pourquoi ce carnet">
       <div class="manifesto-content">
         <h2 class="manifesto-title"><span>✿</span> Pourquoi ouvrir ce journal intime ?</h2>
@@ -158,6 +206,7 @@
       <div class="footer-badges">
         <span class="w3c-badge">HTML5 Valide</span>
         <span class="w3c-badge">CSS3 Valide</span>
+        <span class="w3c-badge">JavaScript Interactif</span>
       </div>
     </div>
   </footer>

@@ -7,12 +7,25 @@
   <meta name="description" content="Page 42 de Mon Journal Doux : créer un cocon de douceur en soirée, allumer une bougie parfumée à la rose et déconnecter des écrans pour une nuit paisible.">
   <title>Page 42 : Mon cocon du soir – Bougies, douceur et déconnexion – Mon Journal Doux</title>
 
+  <!-- Script anti-flash pour le mode sombre -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('mon-journal-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Google Fonts : Fraunces & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../style.css">
+  <script src="../script.js" defer></script>
 </head>
 
 <body>
@@ -23,14 +36,22 @@
         <span class="brand-heart" aria-hidden="true">♡</span>
         <p class="site-title"><a href="../index.html">Mon Journal Doux</a></p>
       </div>
-      <nav aria-label="Navigation principale">
-        <ul>
-          <li><a href="../index.html">Accueil</a></li>
-          <li><a href="../index.html#articles">Journal</a></li>
-          <li><a href="../index.html#manifesto">À propos</a></li>
-          <li><a href="../index.html#contact">Contact</a></li>
-        </ul>
-      </nav>
+
+      <div class="header-actions">
+        <nav aria-label="Navigation principale">
+          <ul>
+            <li><a href="../index.html">Accueil</a></li>
+            <li><a href="../index.html#articles">Journal</a></li>
+            <li><a href="../index.html#manifesto">À propos</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <!-- Bascule Mode Clair / Sombre -->
+        <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Basculer entre le mode clair et le mode nuit" title="Basculer le thème">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -120,6 +141,25 @@
         </p>
       </div>
 
+      <!-- Partage sur les réseaux sociaux -->
+      <section class="share-section" aria-label="Partager cette page">
+        <p class="share-title"><span aria-hidden="true">💌</span> Partager cette page de mon journal :</p>
+        <div class="share-buttons">
+          <button type="button" class="share-btn share-copy" title="Copier le lien de la page">
+            <span aria-hidden="true">📋</span> Copier le lien
+          </button>
+          <a href="#" class="share-btn share-twitter" target="_blank" rel="noopener noreferrer" title="Partager sur X / Twitter">
+            <span aria-hidden="true">🕊️</span> X (Twitter)
+          </a>
+          <a href="#" class="share-btn share-whatsapp" target="_blank" rel="noopener noreferrer" title="Partager sur WhatsApp">
+            <span aria-hidden="true">💬</span> WhatsApp
+          </a>
+          <button type="button" class="share-btn share-native" title="Partager via votre appareil">
+            <span aria-hidden="true">✨</span> Partager
+          </button>
+        </div>
+      </section>
+
       <!-- Carte auteur -->
       <div class="author-card">
         <img src="../images/author.svg" alt="Emma Rose" class="author-card-avatar" width="72" height="72">
@@ -128,6 +168,68 @@
           <p>Créatrice de « Mon Journal Doux », passionnée de papeterie, de petits gâteaux à la fraise et d'écriture introspective. Elle partage ici ses réflexions pour transformer la vie ordinaire en une aventure tendre et poétique.</p>
         </div>
       </div>
+
+      <!-- Section Commentaires interactive -->
+      <section id="comments-section" class="comments-section" aria-label="Confidences et commentaires">
+        <div class="comments-header">
+          <h2><span aria-hidden="true">💬</span> Confidences &amp; Mots doux</h2>
+          <span id="comments-count-badge" class="comments-count-badge">Chargement...</span>
+        </div>
+
+        <!-- Formulaire de dépôt de commentaire -->
+        <form id="comment-form" class="comment-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="comment-author">Votre prénom ou surnom :</label>
+              <input type="text" id="comment-author" class="form-input" placeholder="Ex: Chère lectrice..." required maxlength="40">
+            </div>
+
+            <div class="form-group">
+              <label>Votre humeur du moment :</label>
+              <div class="avatar-selector" role="radiogroup" aria-label="Choisir un avatar ou une humeur">
+                <label class="avatar-label" title="Fleur douce">
+                  <input type="radio" name="comment-avatar" value="🌸" checked>
+                  <span class="avatar-emoji">🌸</span>
+                </label>
+                <label class="avatar-label" title="Petit nœud girly">
+                  <input type="radio" name="comment-avatar" value="🎀">
+                  <span class="avatar-emoji">🎀</span>
+                </label>
+                <label class="avatar-label" title="Étoile scintillante">
+                  <input type="radio" name="comment-avatar" value="✨">
+                  <span class="avatar-emoji">✨</span>
+                </label>
+                <label class="avatar-label" title="Café / Thé chaud">
+                  <input type="radio" name="comment-avatar" value="☕">
+                  <span class="avatar-emoji">☕</span>
+                </label>
+                <label class="avatar-label" title="Bougie parfumée">
+                  <input type="radio" name="comment-avatar" value="🕯️">
+                  <span class="avatar-emoji">🕯️</span>
+                </label>
+                <label class="avatar-label" title="Petit chat">
+                  <input type="radio" name="comment-avatar" value="🐱">
+                  <span class="avatar-emoji">🐱</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="comment-message">Votre confidence ou pensée bienveillante :</label>
+            <textarea id="comment-message" class="form-textarea" placeholder="Partagez votre ressenti, une gratitude ou un mot d'encouragement..." rows="3" required maxlength="500"></textarea>
+          </div>
+
+          <button type="submit" class="comment-submit-btn">
+            <span aria-hidden="true">💌</span> Déposer ma confidence
+          </button>
+        </form>
+
+        <!-- Liste des commentaires -->
+        <div id="comments-list" class="comments-list" role="feed" aria-label="Liste des confidences">
+          <!-- Injecté dynamiquement par JavaScript -->
+        </div>
+      </section>
 
       <!-- Navigation entre articles -->
       <nav class="article-nav" aria-label="Navigation entre articles">
@@ -157,6 +259,7 @@
       <div class="footer-badges">
         <span class="w3c-badge">HTML5 Valide</span>
         <span class="w3c-badge">CSS3 Valide</span>
+        <span class="w3c-badge">JavaScript Interactif</span>
       </div>
     </div>
   </footer>
