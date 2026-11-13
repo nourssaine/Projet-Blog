@@ -4,8 +4,17 @@
 
   const STORAGE_KEYS = {
     THEME: 'mon-journal-theme',
-    COMMENTS_PREFIX: 'mon-journal-comments-'
+    LIKED_ARTICLES: 'mon-journal-liked-articles'
   };
+
+  // Élimination des anciens commentaires stockés dans le localStorage (migration BDD MySQL)
+  try {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('mon-journal-comments-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (e) {}
 
   /* ==========================================================================
      1. GESTION DU MODE CLAIR / SOMBRE 
@@ -224,23 +233,13 @@
           navigator.clipboard.writeText(pageUrl).then(() => {
             showToast('Lien de la page copié dans le presse-papier ! ✨');
           }).catch(() => {
-            fallbackCopy(pageUrl);
+            showToast('Lien de la page n\'est pas copié dans le presse-papier ! ');
           });
-        } else {
-          fallbackCopy(pageUrl);
-        }
+        } 
       };
     }
 
-    function fallbackCopy(text) {
-      const input = document.createElement('input');
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-      showToast('Lien copié dans le presse-papier ! ✨');
-    }
+    
 
     // Partage Twitter
     if (twitterLink) {
@@ -279,7 +278,7 @@
   }
 
   /* ==========================================================================
-     6. SYSTÈME DE COMMENTAIRES INTERACTIF 
+     6. COMMENTAIRES INTERACTIFS (BASE DE DONNÉES MYSQL & PHP / XAMPP)
      ========================================================================== */
   function getArticleId() {
     const path = window.location.pathname;
@@ -289,65 +288,30 @@
     return null;
   }
 
-  function getDefaultComments(articleId) {
-    const defaults = {
-      'article-1': [
-        {
-          id: 'c1',
-          author: 'Léa',
-          avatar: '🌸',
-          date: 'Il y a 3 heures',
-          message: 'Quel régal de lire ces mots ce matin avec mon café au lait d\'avoine ! Ce rituel sans écran a complètement transformé mes journées.',
-          likes: 4
-        },
-        {
-          id: 'c2',
-          author: 'Chloé',
-          avatar: '✨',
-          date: 'Hier à 19:42',
-          message: 'J\'adore la citation de Saint-Exupéry. Prendre le temps d\'écrire le matin m\'aide tellement à apaiser mes pensées avant d\'aller travailler.',
-          likes: 2
-        }
-      ],
-      'article-2': [
-        {
-          id: 'c3',
-          author: 'Camille',
-          avatar: '🎀',
-          date: 'Il y a 1 jour',
-          message: 'Les carnets avec washi tapes et stickers, c\'est toute mon enfance et encore ma passion d\'adulte ! Merci pour ces doux exercices de journaling.',
-          likes: 5
-        },
-        {
-          id: 'c4',
-          author: 'Sarah',
-          avatar: '🐱',
-          date: 'Il y a 3 jours',
-          message: 'Le "Brain Dump" de 10 minutes a sauvé mon sommeil plus d\'une fois. Un article si joliment écrit !',
-          likes: 3
-        }
-      ],
-      'article-3': [
-        {
-          id: 'c5',
-          author: 'Juliette',
-          avatar: '🕯️',
-          date: 'Il y a 5 heures',
-          message: 'L\'odeur de la bougie à la rose et le mode avion à 21h30... je teste ça dès ce soir ! Merci pour cette bulle de bienveillance.',
-          likes: 6
-        },
-        {
-          id: 'c6',
-          author: 'Manon',
-          avatar: '☕',
-          date: 'Hier à 22:15',
-          message: 'Un véritable doudou cet article. La palette rose et le texte justifié rendent la lecture tellement apaisante.',
-          likes: 3
-        }
-      ]
-    };
-    return defaults[articleId] || [];
+  function getCommentsApiUrl() {
+    // Si la page est servie directement par Apache XAMPP dans /projet-blog/
+    if (window.location.pathname.includes('/projet-blog/')) {
+      const isSubPage = window.location.pathname.includes('/pages/');
+      return isSubPage ? '../api/comments.php' : 'api/comments.php';
+    }
+    // Si la page est ouverte via Live Server (port 5500, etc.) ou en file://
+    return 'http://localhost/projet-blog/api/comments.php';
   }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    // Décodage préalable au cas où le texte contiendrait des entités HTML (ex: &#039;)
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    const decoded = txt.value;
+
+    // Ré-encodage sécurisé pour l'affichage HTML dans le DOM
+    const div = document.createElement('div');
+    div.textContent = decoded;
+    return div.innerHTML;
+  }
+
+  let currentArticleComments = [];
 
   function initComments() {
     const articleId = getArticleId();
@@ -356,22 +320,43 @@
     const commentsSection = document.getElementById('comments-section');
     if (!commentsSection) return;
 
-    const storageKey = STORAGE_KEYS.COMMENTS_PREFIX + articleId;
-    let comments = [];
+    const list = document.getElementById('comments-list');
+    const countBadge = document.getElementById('comments-count-badge');
+    const apiUrl = getCommentsApiUrl();
 
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        comments = JSON.parse(saved);
-      } else {
-        comments = getDefaultComments(articleId);
-        localStorage.setItem(storageKey, JSON.stringify(comments));
-      }
-    } catch (e) {
-      comments = getDefaultComments(articleId);
+    if (countBadge) countBadge.textContent = 'Chargement...';
+    if (list) {
+      list.innerHTML = '<p class="no-comments">Chargement des confidences depuis la base de données... 🌸</p>';
     }
 
-    renderComments(comments, storageKey);
+    // Récupération des commentaires depuis l'API PHP / MySQL
+    fetch(`${apiUrl}?article_id=${encodeURIComponent(articleId)}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Erreur de réponse (' + res.status + ')');
+        return res.json();
+      })
+      .then(data => {
+        if (data.success && Array.isArray(data.comments)) {
+          currentArticleComments = data.comments;
+          renderComments(currentArticleComments, apiUrl, articleId);
+        } else {
+          throw new Error(data.error || 'Erreur lors du chargement des commentaires.');
+        }
+      })
+      .catch(err => {
+        console.error('Erreur API Commentaires :', err);
+        if (list) {
+          list.innerHTML = `
+            <div class="comments-error-state" style="text-align:center; padding:1.5rem; background:var(--bg-surface); border:1px dashed var(--accent-rose); border-radius:var(--radius-md);">
+              <p style="color:var(--accent-rose); font-weight:600; margin-bottom:0.5rem;">🌸 Connexion à la base de données en attente</p>
+              <p style="font-size:0.92rem; color:var(--ink-muted); margin:0;">
+                Vérifiez que <strong>Apache</strong> et <strong>MySQL</strong> sont bien démarrés dans le panneau <strong>XAMPP</strong>.
+              </p>
+            </div>
+          `;
+        }
+        if (countBadge) countBadge.textContent = '0 mot doux';
+      });
 
     // Formulaire d'ajout
     const form = document.getElementById('comment-form');
@@ -391,29 +376,52 @@
           return;
         }
 
-        const newComment = {
-          id: 'user-' + Date.now(),
-          author: author,
-          avatar: selectedAvatar,
-          date: 'À l\'instant',
-          message: message,
-          likes: 0,
-          isUser: true
-        };
+        const submitBtn = form.querySelector('.comment-submit-btn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.7';
+        }
 
-        comments.unshift(newComment);
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(comments));
-        } catch (e) {}
-
-        renderComments(comments, storageKey);
-        form.reset();
-        showToast('Votre mot doux a été publié avec succès ! 💌');
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            article_id: articleId,
+            author: author,
+            avatar: selectedAvatar,
+            message: message
+          })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.comment) {
+              data.comment.isUser = true;
+              currentArticleComments.unshift(data.comment);
+              renderComments(currentArticleComments, apiUrl, articleId);
+              form.reset();
+              showToast('Votre mot doux a été enregistré dans la base de données ! 💌');
+            } else {
+              showToast(data.error || 'Erreur lors de l\'enregistrement.');
+            }
+          })
+          .catch(err => {
+            console.error('Erreur ajout commentaire :', err);
+            showToast('Impossible de contacter le serveur MySQL XAMPP.');
+          })
+          .finally(() => {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.style.opacity = '1';
+            }
+          });
       };
     }
   }
 
-  function renderComments(comments, storageKey) {
+  function renderComments(comments, apiUrl, articleId) {
     const list = document.getElementById('comments-list');
     const countBadge = document.getElementById('comments-count-badge');
     if (!list) return;
@@ -433,7 +441,7 @@
         <div class="comment-content">
           <div class="comment-header">
             <span class="comment-author">${escapeHtml(c.author)}</span>
-            <time class="comment-date">${c.date}</time>
+            <time class="comment-date">${c.date || 'Récemment'}</time>
           </div>
           <p class="comment-body">${escapeHtml(c.message)}</p>
           <div class="comment-actions">
@@ -441,47 +449,209 @@
               <span class="like-heart" aria-hidden="true">♡</span>
               <span class="like-count">${c.likes || 0}</span>
             </button>
-            ${c.isUser ? `<button type="button" class="comment-delete-btn" data-id="${c.id}" aria-label="Supprimer mon mot doux">Supprimer</button>` : ''}
+            <button type="button" class="comment-delete-btn" data-id="${c.id}" aria-label="Supprimer ce mot doux">Supprimer</button>
           </div>
         </div>
       </article>
     `).join('');
 
-    //  likes
+    // Gestion des likes avec l'API PHP MySQL
     list.querySelectorAll('.comment-like-btn').forEach(btn => {
       btn.onclick = function () {
         const id = btn.getAttribute('data-id');
-        const comment = comments.find(c => c.id === id);
-        if (comment) {
-          const isLiked = btn.classList.toggle('liked');
-          comment.likes = (comment.likes || 0) + (isLiked ? 1 : -1);
-          btn.querySelector('.like-heart').textContent = isLiked ? '❤️' : '♡';
-          btn.querySelector('.like-count').textContent = comment.likes;
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(comments));
-          } catch (e) {}
-        }
+        const comment = comments.find(c => String(c.id) === String(id));
+        if (!comment) return;
+
+        const isLiked = btn.classList.toggle('liked');
+        btn.querySelector('.like-heart').textContent = isLiked ? '❤️' : '♡';
+
+        fetch(`${apiUrl}?action=like`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, liked: isLiked })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && typeof data.likes === 'number') {
+              comment.likes = data.likes;
+              btn.querySelector('.like-count').textContent = data.likes;
+            }
+          })
+          .catch(err => {
+            console.error('Erreur like :', err);
+          });
       };
     });
 
-    //  la suppression
+    // Gestion de la suppression avec l'API PHP MySQL
     list.querySelectorAll('.comment-delete-btn').forEach(btn => {
       btn.onclick = function () {
         const id = btn.getAttribute('data-id');
-        comments = comments.filter(c => c.id !== id);
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(comments));
-        } catch (e) {}
-        renderComments(comments, storageKey);
-        showToast('Votre mot doux a été retiré.');
+        if (!confirm('Voulez-vous vraiment supprimer ce mot doux de la base de données ?')) return;
+
+        fetch(`${apiUrl}?action=delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              const idx = comments.findIndex(c => String(c.id) === String(id));
+              if (idx !== -1) comments.splice(idx, 1);
+              renderComments(comments, apiUrl, articleId);
+              showToast('Le mot doux a été retiré de la base de données.');
+            } else {
+              showToast(data.error || 'Erreur lors de la suppression.');
+            }
+          })
+          .catch(err => {
+            console.error('Erreur delete :', err);
+            showToast('Impossible de contacter le serveur pour supprimer le commentaire.');
+          });
       };
     });
   }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+  /* ==========================================================================
+     7. J'AIME GLOBAUX SUR LES ARTICLES (PHP & MYSQL)
+     ========================================================================== */
+  function getArticlesApiUrl() {
+    // Si la page est servie directement par Apache XAMPP dans /projet-blog/
+    if (window.location.pathname.includes('/projet-blog/')) {
+      const isSubPage = window.location.pathname.includes('/pages/');
+      return isSubPage ? '../api/articles.php' : 'api/articles.php';
+    }
+    // Si la page est ouverte via Live Server (port 5500, etc.) ou en file://
+    return 'http://localhost/projet-blog/api/articles.php';
+  }
+
+  function getLikedArticlesFromStorage() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.LIKED_ARTICLES);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveLikedArticlesToStorage(list) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.LIKED_ARTICLES, JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  function initArticleGlobalLike() {
+    const likeBtn = document.getElementById('article-global-like-btn');
+    if (!likeBtn) return;
+
+    const slug = likeBtn.getAttribute('data-slug') || getArticleId();
+    if (!slug) return;
+
+    const heartIcon = likeBtn.querySelector('.like-heart');
+    const countElement = document.getElementById('article-likes-count');
+    const apiUrl = getArticlesApiUrl();
+
+    // 1. Vérification si l'utilisateur a déjà aimé cet article sur ce navigateur
+    let likedList = getLikedArticlesFromStorage();
+    let isLiked = likedList.includes(slug);
+
+    if (isLiked) {
+      likeBtn.classList.add('liked');
+      likeBtn.setAttribute('aria-pressed', 'true');
+      if (heartIcon) heartIcon.textContent = '❤️';
+    } else {
+      likeBtn.classList.remove('liked');
+      likeBtn.setAttribute('aria-pressed', 'false');
+      if (heartIcon) heartIcon.textContent = '♡';
+    }
+
+    // 2. Synchronisation de la valeur actuelle depuis la base MySQL
+    fetch(`${apiUrl}?slug=${encodeURIComponent(slug)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.article && typeof data.article.likes === 'number') {
+          if (countElement) {
+            countElement.textContent = data.article.likes;
+          }
+        }
+      })
+      .catch(() => {
+        // En cas d'indisponibilité du serveur, la valeur statique initiale reste affichée
+      });
+
+    // 3. Clic sur le bouton J'aime
+    likeBtn.onclick = function () {
+      likedList = getLikedArticlesFromStorage();
+      const willLike = !likeBtn.classList.contains('liked');
+
+      // Mise à jour visuelle optimiste immédiate
+      likeBtn.classList.toggle('liked', willLike);
+      likeBtn.setAttribute('aria-pressed', willLike ? 'true' : 'false');
+      if (heartIcon) heartIcon.textContent = willLike ? '❤️' : '♡';
+
+      let currentLikes = parseInt(countElement?.textContent || '0', 10);
+      let optimisticLikes = Math.max(0, currentLikes + (willLike ? 1 : -1));
+      if (countElement) countElement.textContent = optimisticLikes;
+
+      // Mise à jour de l'état local dans le navigateur
+      if (willLike) {
+        if (!likedList.includes(slug)) likedList.push(slug);
+      } else {
+        likedList = likedList.filter(s => s !== slug);
+      }
+      saveLikedArticlesToStorage(likedList);
+
+      // Envoi de la requête au serveur PHP MySQL
+      fetch(`${apiUrl}?action=like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ slug: slug, liked: willLike })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && typeof data.likes === 'number') {
+            if (countElement) countElement.textContent = data.likes;
+          }
+          showToast(willLike ? 'Merci pour votre doux j\'aime ! 💖' : 'Mention j\'aime retirée ♡');
+        })
+        .catch(err => {
+          console.error('Erreur API Article Like :', err);
+          showToast(willLike ? 'J\'aime enregistré localement (serveur MySQL hors ligne).' : 'J\'aime retiré localement.');
+        });
+    };
+  }
+
+  function syncHomepageLikes() {
+    const badges = document.querySelectorAll('.card-likes-badge');
+    if (badges.length === 0) return;
+
+    const apiUrl = getArticlesApiUrl();
+
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.articles)) {
+          const likesMap = {};
+          data.articles.forEach(art => {
+            likesMap[art.slug] = art.likes;
+          });
+
+          badges.forEach(badge => {
+            const slug = badge.getAttribute('data-slug');
+            if (slug && likesMap[slug] !== undefined) {
+              const numEl = badge.querySelector('.card-like-num');
+              if (numEl) numEl.textContent = likesMap[slug];
+            }
+          });
+        }
+      })
+      .catch(() => {
+        // Garder les compteurs par défaut
+      });
   }
 
   /* ==========================================================================
@@ -671,6 +841,8 @@
     initBackToTop();
     initShareButtons();
     initComments();
+    initArticleGlobalLike();
+    syncHomepageLikes();
   }
 
   /* ==========================================================================
@@ -683,6 +855,8 @@
     initBackToTop();
     initShareButtons();
     initComments();
+    initArticleGlobalLike();
+    syncHomepageLikes();
     initSmoothNavigation();
   }
 
